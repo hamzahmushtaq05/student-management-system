@@ -16,8 +16,10 @@ students = [
 def main_menu():
     print("\n-----Student Management App-----\n1.Log in as Student\n2.Log in as Admin\n0.Exit\n")
 
+
 def admin_menu():
     print("\n-----Admin menu----- \n1.Add Students \n2.Display Students \n3.Delete Student \n") 
+
  
 def search_student(student_name, students):
     for student in students:
@@ -29,12 +31,14 @@ def search_student(student_name, students):
 def find_avg(student):
     return sum(student["grades"]) / len(student["grades"])
 
+
 def check_password(password):
     correct_pass = "Admin123456"
     if password == correct_pass:
             return True
-    return False    
+    return False 
 
+   
 def display_student_info(student_name, students):
     display = search_student(student_name, students)
     if display is None:
@@ -47,7 +51,21 @@ def display_student_info(student_name, students):
         else:
             status = "failed"
         print(f"Student ID: {display['id']} \nName: {display['name']} \nAge: {display['age']} \nGrades: {display['grades']} \nAverage: {avg} \nStatus: {status}")
-        
+
+
+def add_student(students):
+    student_id = len(students) + 1
+    student_name = input("Enter student name: ")
+    student_age = int(input("Enter student age: "))
+    student_grades = list(map(int, input("Enter student grades (comma-separated): ").split(',')))
+    new_student = {
+        "id": student_id,
+        "name": student_name,
+        "age": student_age,
+        "grades": student_grades
+    }
+    students.append(new_student)
+    print(f"Student {student_name} added successfully.")       
 
 while True:
     main_menu()
@@ -69,6 +87,8 @@ while True:
         if check == True:
             admin_menu()
             admin_menu_op = input("input: ")
+            if admin_menu_op == "1":
+                add_student(students)
         elif check == False:
             print("Incorrect password. Access denied.")
     elif main_menu_op == "0":
