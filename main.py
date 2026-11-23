@@ -29,13 +29,78 @@ def student_management_menu():
 
 
 def student_report_menu():
-    print("\n-----View Student menu----- \n1.Display all Students \n2.Display Passed Students \n3.Display Failed Student \n4.Display Honour Students \n5.Display valedictorian \n0.Back to Admin Menu")
+    print("\n-----View Student menu----- \n1.Display all Students \n2.Display Passed Students \n3.Display Failed Student \n4.Display Honor Students \n5.Display valedictorian \n0.Back to Admin Menu")
 
 
 def edit_student_menu():
     print("\n-----Edit Student Info menu----- \n1.Edit Name \n2.Edit Age \n3.Edit Grades \n0.Back to Admin Menu")
     
-    
+def edit_student_name(student_name, students):
+    student_to_edit = search_student(student_name, students)
+    if student_to_edit is None:
+        print("Student not found.")
+        return
+    else:
+        new_name = input("Enter new name: ")
+        student_to_edit["name"] = new_name
+        print(f"Student name updated to {new_name} successfully.")
+        
+def edit_student_age(student_name, students):
+    student_to_edit = search_student(student_name, students)
+    if student_to_edit is None:
+        print("Student not found.")
+        return
+    else:
+        check_age_valid = False
+        while not check_age_valid:
+            try:
+                new_age = int(input("Enter new age: "))
+                if new_age < 0:
+                    print("Age cannot be negative. Please enter a valid age.")
+                    continue
+                check_age_valid = True
+            except ValueError:
+                print("Invalid input. Please enter a valid integer for age.")
+        student_to_edit["age"] = new_age
+        print(f"Student age updated to {new_age} successfully.")
+        
+        
+def edit_student_grades(student_name, students):
+    student_to_edit = search_student(student_name, students)
+    if student_to_edit is None:
+        print("Student not found.")
+        return
+    else:
+        check_grades_valid = False
+        while not check_grades_valid:
+            try:
+                new_grades = list(input("Enter new grades (comma-separated): ").split(','))
+                new_grades = new_grades[:3]
+                new_grades = list(map(int, new_grades))         
+                while len(new_grades) < 3:
+                    missing_grades = 3 - len(new_grades)
+                    print(f"You have entered {len(new_grades)} grades. Please enter {missing_grades} more grade(s).") 
+                    try:
+                        additional_grades = list(input("Enter additional grades (comma-separated): ").split(','))
+                        additional_grades = additional_grades[:missing_grades]
+                        additional_grades = list(map(int, additional_grades))
+                        new_grades.extend(additional_grades)
+                    except ValueError:
+                        print("Invalid input. Please enter valid integers for grades.")
+                for index in range(len(new_grades)):
+                    while new_grades[index] < 0 or new_grades[index] > 100:
+                        print("Grades must be between 0 and 100. Please enter valid grades.")
+                        try:
+                            new_grades[index] = int(input("Please enter a valid grade: "))
+                        except ValueError:
+                            print("Invalid input. Please enter valid integers for grades.")
+                check_grades_valid = True
+            except ValueError:
+                print("Invalid input. Please enter valid integers for grades.")
+        student_to_edit["grades"] = new_grades
+        print(f"Student grades updated to {new_grades} successfully.")
+
+  
 def search_student(student_name, students):
     for student in students:
         if student["name"] == student_name:
@@ -137,9 +202,57 @@ def add_student(students):
     students.append(new_student)
     print(f"Student {student_name} added successfully.")  
     
+def display_all_students(students):
+    if not students:
+        print("No students found.")
+        return
+    for student in students:
+        avg = find_avg(student)
+        if avg >= 50:
+            status = "Passed"
+        else:
+            status = "Failed"
+        print(f"Student ID: {student['id']} \nName: {student['name']} \nAge: {student['age']} \nGrades: {student['grades']} \nAverage: {avg} \nStatus: {status}\n")
  
- 
-         
+def display_passed_students(students):
+    passed_students = [student for student in students if find_avg(student) >= 50]
+    if not passed_students:
+        print("No passed students found.")
+        return
+    for student in passed_students:
+        avg = find_avg(student)
+        print(f"Student ID: {student['id']} \nName: {student['name']} \nAge: {student['age']} \nGrades: {student['grades']} \nAverage: {avg} \nStatus: Passed\n")  
+        
+
+
+def display_failed_students(students):
+    failed_students = [student for student in students if find_avg(student) <= 50]
+    if not failed_students:
+        print("No failed students found.")
+        return
+    for student in failed_students:
+        avg = find_avg(student)
+        print(f"Student ID: {student['id']} \nName: {student['name']} \nAge: {student['age']} \nGrades: {student['grades']} \nAverage: {avg} \nStatus: Failed\n")
+        
+
+def display_honor_students(students):
+    honor_students = [student for student in students if find_avg(student) >= 87]
+    if not honor_students:
+        print("No honor students found.")
+        return
+    for student in honor_students:
+        avg = find_avg(student)
+        print(f"Student ID: {student['id']} \nName: {student['name']} \nAge: {student['age']} \nGrades: {student['grades']} \nAverage: {avg} \nStatus: Honor\n")
+        
+
+def display_valedictorian(students):
+    if not students:
+        print("No students found.")
+        return
+    valedictorian = max(students, key=find_avg)
+    avg = find_avg(valedictorian)
+    print(f"Valedictorian: \nStudent ID: {valedictorian['id']} \nName: {valedictorian['name']} \nAge: {valedictorian['age']} \nGrades: {valedictorian['grades']} \nAverage: {avg} \nStatus: Valedictorian\n")
+            
 while True:
     main_menu()
     main_menu_op = input("input: ")
@@ -182,14 +295,17 @@ while True:
                                 edit_student_menu()
                                 edit_student_menu_op = input("input: ")
                                 if edit_student_menu_op == "1":
-                                    # Edit Name
-                                    pass
+                                    student_name = input("Enter the name of the student to edit: ")
+                                    display_student_info(student_name, students)
+                                    edit_student_name(student_name, students)
                                 elif edit_student_menu_op == "2":
-                                    # Edit Age
-                                    pass
+                                    student_name = input("Enter the name of the student to edit: ")
+                                    display_student_info(student_name, students)
+                                    edit_student_age(student_name, students)
                                 elif edit_student_menu_op == "3":
-                                    # Edit Grades
-                                    pass
+                                    student_name = input("Enter the name of the student to edit: ")
+                                    display_student_info(student_name, students)
+                                    edit_student_grades(student_name, students)
                                 elif edit_student_menu_op == "0":
                                     break
                                 else:
@@ -208,17 +324,13 @@ while True:
                         if student_report_menu_op == "1":
                             display_all_students(students)
                         elif student_report_menu_op == "2":
-                            # Display Passed Students
-                            pass
+                            display_passed_students(students)
                         elif student_report_menu_op == "3":
-                            # Display Failed Student
-                            pass
+                            display_failed_students(students)
                         elif student_report_menu_op == "4":
-                            # Display Honour Students
-                            pass
+                            display_honor_students(students)
                         elif student_report_menu_op == "5":
-                            # Display valedictorian
-                            pass
+                            display_valedictorian(students)
                         elif student_report_menu_op == "0":
                             break
                         else:
